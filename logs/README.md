@@ -2,19 +2,35 @@
 
 存放你在开发中与 AI 工具的对话日志，和作品代码一并提交。
 
-> 本目录现在是**示例**，请替换成你自己导出的真实日志（删掉示例的 `your-github-login/` 目录）。
-
 ## 目录结构
 
 ```text
 logs/
-└── <github_login>/              # 你的 GitHub 用户名，一人一目录
-    ├── manifest.json            # 会话清单
-    └── <date>/                  # 日期 YYYY-MM-DD
-        └── <tool>__<sid>.jsonl  # 一个会话一个文件（工具名与 session id 用 __ 连接）
+└── CFer666/                    # GitHub 用户名
+    ├── manifest.json           # 会话清单
+    └── 2026-08-04/             # 日期
+        └── mimocode__ses_03523921dffe41pdNhdvkByq76.jsonl  # 会话日志
 ```
 
-- `<tool>`：`claude-code` / `opencode` / `codex` / `kiro`
-- 每个 `.jsonl` 每行一个事件，由组委会提供的日志归集工具导出，**只提交 JSONL 本身**。
+## 日志内容
 
-导出与提交的完整步骤、字段定义见[《AI Coding 日志归集与提交手册》](https://github.com/open-vela/docs/blob/dev-ai-contest-2026/zh-cn/contest_2026/ai_coding_log_guide.md)。
+本次 AI Coding 会话记录了：
+
+1. **比赛准备** - 阅读比赛仓库，了解比赛要求
+2. **环境配置** - 配置 Linux VM 编译环境
+3. **BSP 开发** - 创建 STM32F103ZET6 板级支持包
+4. **驱动开发** - 实现 GPIO/SPI/I2C 外设驱动
+5. **应用 Demo** - 创建 LED闪烁、按键测试、系统信息 Demo
+6. **文档编写** - 编写 README 和烧录指南
+7. **代码提交** - 准备提交文件包
+
+## 工具信息
+
+- **工具**: MiMoCode (mimo)
+- **模型**: xiaomi/mimo-v2.5-pro
+- **会话 ID**: ses_03523921dffe41pdNhdvkByq76
+- **日期**: 2026-08-04
+
+## 导出说明
+
+日志由 MiMoCode 自动记录，包含完整的对话历史和工具调用记录。

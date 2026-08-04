@@ -1,0 +1,13 @@
+{
+  "version": "1.0",
+  "user": "CFer666",
+  "sessions": [
+    {
+      "id": "ses_03523921dffe41pdNhdvkByq76",
+      "tool": "mimocode",
+      "date": "2026-08-04",
+      "file": "2026-08-04/mimocode__ses_03523921dffe41pdNhdvkByq76.jsonl",
+      "description": "STM32F103ZET6 openvela 移植 - 新硬件适配赛道"
+    }
+  ]
+}
