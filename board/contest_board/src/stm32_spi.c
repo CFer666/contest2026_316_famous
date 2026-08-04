@@ -1,5 +1,5 @@
 /****************************************************************************
- * Contest 2026 team 316 - STM32F103ZET6 Board Initialization
+ * Contest 2026 team 316 - STM32F103ZET6 SPI Driver
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,8 +25,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/board.h>
-#include <nuttx/leds/userled.h>
+#include <nuttx/spi/spi.h>
 
 #include <stm32.h>
 #include <arch/board/board.h>
@@ -35,64 +34,89 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* LED Pin Definitions (using definitions from board.h) */
-/* GPIO_LED1, GPIO_LED2, GPIO_LED3 are defined in board.h */
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: board_led_initialize
- *
- * Description:
- *   Initialize LED GPIO pins.
- *
- ****************************************************************************/
-
-static void board_led_initialize(void)
-{
-  /* Configure LED pins as output */
-
-  stm32_configgpio(GPIO_LED1);
-  stm32_configgpio(GPIO_LED2);
-  stm32_configgpio(GPIO_LED3);
-}
+/* SPI1 Pin Definitions (using definitions from board.h) */
+/* GPIO_SPI1_SCK, GPIO_SPI1_MISO, GPIO_SPI1_MOSI, GPIO_SPI1_NSS */
+/* are defined in board.h */
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: openvela_board_initialize
+ * Name: stm32_spi1_initialize
  *
  * Description:
- *   Board-specific initialization called after NuttX has been initialized.
+ *   Initialize SPI1 peripheral and configure GPIO pins.
  *
  ****************************************************************************/
 
-void openvela_board_initialize(void)
+int stm32_spi1_initialize(void)
 {
-#ifdef CONFIG_ARCH_LEDS
-  board_led_initialize();
-#endif
+  /* Configure SPI1 GPIO pins */
+
+  stm32_configgpio(GPIO_SPI1_SCK);
+  stm32_configgpio(GPIO_SPI1_MISO);
+  stm32_configgpio(GPIO_SPI1_MOSI);
+  stm32_configgpio(GPIO_SPI1_NSS);
+
+  /* SPI1 is initialized by the STM32 SPI driver automatically */
+  /* when CONFIG_STM32_SPI1 is enabled in defconfig */
+
+  return OK;
 }
 
 /****************************************************************************
- * Name: board_late_initialize
+ * Name: stm32_spi1_select
  *
  * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will
- *   be called after all OS-related initialization has been completed but
- *   before the init thread is started.
+ *   Select SPI1 device (assert NSS/CS).
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-void board_late_initialize(void)
+void stm32_spi1_select(struct spi_dev_s *dev, uint32_t devid, bool selected)
 {
-  /* Perform any additional board initialization here */
+  /* Assert/deassert chip select */
+
+  stm32_gpiowrite(GPIO_SPI1_NSS, !selected);
 }
-#endif
+
+/****************************************************************************
+ * Name: stm32_spi1_setfrequency
+ *
+ * Description:
+ *   Set SPI1 clock frequency.
+ *
+ ****************************************************************************/
+
+uint32_t stm32_spi1_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
+{
+  /* The actual frequency setting is handled by the STM32 SPI driver */
+
+  return frequency;
+}
+
+/****************************************************************************
+ * Name: stm32_spi1_setmode
+ *
+ * Description:
+ *   Set SPI1 mode (CPOL/CPHA).
+ *
+ ****************************************************************************/
+
+void stm32_spi1_setmode(struct spi_dev_s *dev, enum spi_mode_e mode)
+{
+  /* The actual mode setting is handled by the STM32 SPI driver */
+}
+
+/****************************************************************************
+ * Name: stm32_spi1_setbits
+ *
+ * Description:
+ *   Set SPI1 word size (8 or 16 bits).
+ *
+ ****************************************************************************/
+
+void stm32_spi1_setbits(struct spi_dev_s *dev, int nbits)
+{
+  /* The actual bits setting is handled by the STM32 SPI driver */
+}
