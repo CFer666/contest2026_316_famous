@@ -1,5 +1,5 @@
 /****************************************************************************
- * Contest 2026 team 316 - STM32F103ZET6 Board Initialization
+ * Contest 2026 team 316 - STM32F103ZET6 GPIO Driver
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,8 +25,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/board.h>
-#include <nuttx/leds/userled.h>
+#include <nuttx/compiler.h>
+#include <nuttx/kmalloc.h>
 
 #include <stm32.h>
 #include <arch/board/board.h>
@@ -38,61 +38,76 @@
 /* LED Pin Definitions (using definitions from board.h) */
 /* GPIO_LED1, GPIO_LED2, GPIO_LED3 are defined in board.h */
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: board_led_initialize
- *
- * Description:
- *   Initialize LED GPIO pins.
- *
- ****************************************************************************/
-
-static void board_led_initialize(void)
-{
-  /* Configure LED pins as output */
-
-  stm32_configgpio(GPIO_LED1);
-  stm32_configgpio(GPIO_LED2);
-  stm32_configgpio(GPIO_LED3);
-}
+/* Button Pin Definition */
+/* GPIO_BTN_USER is defined in board.h */
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: openvela_board_initialize
+ * Name: stm32_gpio_initialize
  *
  * Description:
- *   Board-specific initialization called after NuttX has been initialized.
+ *   Initialize GPIO pins for LEDs and buttons.
  *
  ****************************************************************************/
 
-void openvela_board_initialize(void)
+int stm32_gpio_initialize(void)
 {
-#ifdef CONFIG_ARCH_LEDS
-  board_led_initialize();
-#endif
+  /* Configure LED pins as output */
+
+  stm32_configgpio(GPIO_LED1);
+  stm32_configgpio(GPIO_LED2);
+  stm32_configgpio(GPIO_LED3);
+
+  /* Configure button pin as input with pull-up */
+
+  stm32_configgpio(GPIO_BTN_USER);
+
+  return OK;
 }
 
 /****************************************************************************
- * Name: board_late_initialize
+ * Name: stm32_gpio_set_led
  *
  * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will
- *   be called after all OS-related initialization has been completed but
- *   before the init thread is started.
+ *   Set LED state.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-void board_late_initialize(void)
+int stm32_gpio_set_led(int led_num, bool state)
 {
-  /* Perform any additional board initialization here */
+  uint32_t pin;
+
+  switch (led_num)
+    {
+      case 0:
+        pin = GPIO_LED1;
+        break;
+      case 1:
+        pin = GPIO_LED2;
+        break;
+      case 2:
+        pin = GPIO_LED3;
+        break;
+      default:
+        return -EINVAL;
+    }
+
+  stm32_gpiowrite(pin, state);
+  return OK;
 }
-#endif
+
+/****************************************************************************
+ * Name: stm32_gpio_read_button
+ *
+ * Description:
+ *   Read button state.
+ *
+ ****************************************************************************/
+
+int stm32_gpio_read_button(void)
+{
+  return stm32_gpioread(GPIO_BTN_USER) ? 1 : 0;
+}

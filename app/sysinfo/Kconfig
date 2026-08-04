@@ -1,0 +1,7 @@
+# System Info Demo Configuration
+config APP_SYSINFO
+	bool "System Info Demo"
+	default y
+	---help---
+		Enable system info demo application for STM32F103ZET6.
+		Shows system information and available commands.
