@@ -78,39 +78,17 @@
 #define BOARD_TIM3_FREQUENCY    STM32_HCLK_FREQUENCY
 #define BOARD_TIM4_FREQUENCY    STM32_HCLK_FREQUENCY
 
-/* USART Configuration ******************************************************/
+/* LSI (Low-Speed Internal) oscillator is ~40kHz on the STM32F103.  It is
+ * used as the clock source for the independent watchdog (IWDG).
+ */
+#define STM32_LSI_FREQUENCY     40000
 
-/* USART1: PA9=TX, PA10=RX (connected to ST-Link VCP or USB-UART adapter) */
-#define GPIO_USART1_TX  (GPIO_ALT | GPIO_CNF_AFPP | GPIO_MODE_50MHz | \
-                         GPIO_PORTA | GPIO_PIN9)
-#define GPIO_USART1_RX  (GPIO_INPUT | GPIO_CNF_INPUPD | GPIO_MODE_INPUT | \
-                         GPIO_PORTA | GPIO_PIN10)
-
-/* USART2: PA2=TX, PA3=RX (available for additional communication) */
-#define GPIO_USART2_TX  (GPIO_ALT | GPIO_CNF_AFPP | GPIO_MODE_50MHz | \
-                         GPIO_PORTA | GPIO_PIN2)
-#define GPIO_USART2_RX  (GPIO_INPUT | GPIO_CNF_INPUPD | GPIO_MODE_INPUT | \
-                         GPIO_PORTA | GPIO_PIN3)
-
-/* SPI Configuration ********************************************************/
-
-/* SPI1: PA5=SCK, PA6=MISO, PA7=MOSI, PA4=NSS (software controlled) */
-#define GPIO_SPI1_SCK   (GPIO_ALT | GPIO_CNF_AFPP | GPIO_MODE_50MHz | \
-                         GPIO_PORTA | GPIO_PIN5)
-#define GPIO_SPI1_MISO  (GPIO_INPUT | GPIO_CNF_INFLOAT | GPIO_MODE_INPUT | \
-                         GPIO_PORTA | GPIO_PIN6)
-#define GPIO_SPI1_MOSI  (GPIO_ALT | GPIO_CNF_AFPP | GPIO_MODE_50MHz | \
-                         GPIO_PORTA | GPIO_PIN7)
-#define GPIO_SPI1_NSS   (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
-                         GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN4)
-
-/* I2C Configuration ********************************************************/
-
-/* I2C1: PB6=SCL, PB7=SDA */
-#define GPIO_I2C1_SCL   (GPIO_ALT | GPIO_CNF_AFOD | GPIO_MODE_50MHz | \
-                         GPIO_PORTB | GPIO_PIN6)
-#define GPIO_I2C1_SDA   (GPIO_ALT | GPIO_CNF_AFOD | GPIO_MODE_50MHz | \
-                         GPIO_PORTB | GPIO_PIN7)
+/* Peripheral Pin Mapping **************************************************/
+/* NOTE: The USART/SPI/I2C/ADC/TIM peripheral pins (GPIO_USART1_*, GPIO_SPI1_*,
+ * GPIO_I2C1_*, GPIO_ADC1_IN*, GPIO_TIM1_CH*OUT, ...) are provided by the chip
+ * pinmap (hardware/stm32f103z_pinmap_legacy.h) and are intentionally NOT
+ * redefined here.  Only board-specific pins are defined below.
+ */
 
 /* LED Configuration ********************************************************/
 
@@ -124,31 +102,15 @@
 
 /* Button Configuration ****************************************************/
 
-/* USER button (typically on PA0) */
-#define GPIO_BTN_USER   (GPIO_INPUT | GPIO_CNF_INPUPD | GPIO_MODE_INPUT | \
+/* USER button on PA0, active-low (internal pull-up) */
+#define GPIO_BTN_USER   (GPIO_INPUT | GPIO_CNF_INPULLUP | GPIO_MODE_INPUT | \
                          GPIO_PORTA | GPIO_PIN0)
 
-/* ADC Configuration ********************************************************/
+/* SPI1 Chip Select ********************************************************/
 
-/* ADC1: PA0 (shared with USER button), PA1, PA2 */
-#define GPIO_ADC1_IN0   (GPIO_INPUT | GPIO_CNF_ANALOG | GPIO_MODE_INPUT | \
-                         GPIO_PORTA | GPIO_PIN0)
-#define GPIO_ADC1_IN1   (GPIO_INPUT | GPIO_CNF_ANALOG | GPIO_MODE_INPUT | \
-                         GPIO_PORTA | GPIO_PIN1)
-#define GPIO_ADC1_IN2   (GPIO_INPUT | GPIO_CNF_ANALOG | GPIO_MODE_INPUT | \
-                         GPIO_PORTA | GPIO_PIN2)
-
-/* PWM Configuration ********************************************************/
-
-/* TIM1: PA8 (CH1) */
-#define GPIO_TIM1_CH1   (GPIO_ALT | GPIO_CNF_AFPP | GPIO_MODE_50MHz | \
-                         GPIO_PORTA | GPIO_PIN8)
-
-/* TIM2: PA0 (CH1), PA1 (CH2) - shared with ADC/USER button */
-#define GPIO_TIM2_CH1   (GPIO_ALT | GPIO_CNF_AFPP | GPIO_MODE_50MHz | \
-                         GPIO_PORTA | GPIO_PIN0)
-#define GPIO_TIM2_CH2   (GPIO_ALT | GPIO_CNF_AFPP | GPIO_MODE_50MHz | \
-                         GPIO_PORTA | GPIO_PIN1)
+/* Software-controlled SPI1 chip select on PA4 (active-low) */
+#define GPIO_SPI1_CS    (GPIO_OUTPUT | GPIO_CNF_OUTPP | GPIO_MODE_50MHz | \
+                         GPIO_OUTPUT_SET | GPIO_PORTA | GPIO_PIN4)
 
 /* JTAG/SWD Configuration **************************************************/
 

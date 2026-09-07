@@ -73,13 +73,17 @@ void stm32_boardinitialize(void)
 
   stm32_gpio_initialize();
 
-  /* Configure SPI1 pins (SCK/MISO/MOSI/NSS) */
+  /* Configure the board-specific SPI1 chip-select pin.  The SCK/MISO/MOSI
+   * pins are configured by the common SPI driver during bring-up.
+   */
 
 #ifdef CONFIG_STM32_SPI1
   stm32_spi1_initialize();
 #endif
 
-  /* Configure I2C1 pins (SCL/SDA) */
+  /* Configure I2C1 pins (SCL/SDA); the peripheral itself is initialized
+   * during bring-up.
+   */
 
 #ifdef CONFIG_STM32_I2C1
   stm32_i2c1_initialize();
