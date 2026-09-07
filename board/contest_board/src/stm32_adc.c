@@ -1,5 +1,5 @@
 /****************************************************************************
- * Contest 2026 team 316 - STM32F103ZET6 SPI Driver
+ * Contest 2026 team 316 - STM32F103ZET6 ADC Driver
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -26,63 +26,99 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <errno.h>
 #include <debug.h>
 
-#include <nuttx/spi/spi.h>
+#include <nuttx/board.h>
+#include <nuttx/analog/adc.h>
+#include <arch/board/board.h>
 
 #include <stm32.h>
-#include <arch/board/board.h>
+
+#ifdef CONFIG_ADC
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* ADC1 uses channels 0, 1 and 2, mapped to PA0, PA1 and PA2 respectively. */
+
+#define ADC1_NCHANNELS 3
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* Identifying number of each ADC channel in the conversion list */
+
+static const uint8_t g_chanlist[ADC1_NCHANNELS] =
+{
+  0, 1, 2
+};
+
+/* Configurations of the pins used by each ADC channel */
+
+static const uint32_t g_pinlist[ADC1_NCHANNELS] =
+{
+  GPIO_ADC1_IN0,
+  GPIO_ADC1_IN1,
+  GPIO_ADC1_IN2
+};
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_spi1_initialize
+ * Name: stm32_adc_setup
  *
  * Description:
- *   Configure the board-specific SPI1 chip-select pin.  The SCK/MISO/MOSI
- *   pins are configured by the common STM32 SPI driver when
- *   stm32_spibus_initialize(1) is called during bring-up.
+ *   Initialize ADC1 and register the ADC driver at /dev/adc0.
  *
  ****************************************************************************/
 
-int stm32_spi1_initialize(void)
+int stm32_adc_setup(void)
 {
-  /* Configure the software-controlled SPI1 chip select (PA4) */
+  static bool initialized = false;
+  struct adc_dev_s *adc;
+  int ret;
+  int i;
 
-  stm32_configgpio(GPIO_SPI1_CS);
+  /* Check if we have already initialized */
+
+  if (!initialized)
+    {
+      /* Configure the pins as analog inputs for the selected channels */
+
+      for (i = 0; i < ADC1_NCHANNELS; i++)
+        {
+          stm32_configgpio(g_pinlist[i]);
+        }
+
+      /* Call stm32_adcinitialize() to get an instance of the ADC interface */
+
+      adc = stm32_adcinitialize(1, g_chanlist, ADC1_NCHANNELS);
+      if (adc == NULL)
+        {
+          aerr("ERROR: Failed to get ADC interface\n");
+          return -ENODEV;
+        }
+
+      /* Register the ADC driver at "/dev/adc0" */
+
+      ret = adc_register("/dev/adc0", adc);
+      if (ret < 0)
+        {
+          aerr("ERROR: adc_register failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Now we are initialized */
+
+      initialized = true;
+    }
 
   return OK;
 }
 
-/****************************************************************************
- * Name: stm32_spi1select
- *
- * Description:
- *   Board-specific chip select management for the SPI1 bus.  NSS is driven
- *   in software via PA4 (active-low), so assert the pin low when selected
- *   and release it high when deselected.
- *
- ****************************************************************************/
-
-void stm32_spi1select(struct spi_dev_s *dev, uint32_t devid, bool selected)
-{
-  stm32_gpiowrite(GPIO_SPI1_CS, !selected);
-}
-
-/****************************************************************************
- * Name: stm32_spi1status
- *
- * Description:
- *   Return the status of the SPI1 bus.  The device on this bus is always
- *   present.
- *
- ****************************************************************************/
-
-uint8_t stm32_spi1status(struct spi_dev_s *dev, uint32_t devid)
-{
-  return SPI_STATUS_PRESENT;
-}
+#endif /* CONFIG_ADC */

@@ -6,6 +6,8 @@ target_sources(board PRIVATE
   stm32_gpio.c
   stm32_spi.c
   stm32_i2c.c
+  stm32_adc.c
+  stm32_pwm.c
   stm32_bringup.c
   stm32_userleds.c
   stm32_buttons.c

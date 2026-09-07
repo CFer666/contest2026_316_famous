@@ -1,5 +1,5 @@
 /****************************************************************************
- * Contest 2026 team 316 - STM32F103ZET6 I2C Driver
+ * Contest 2026 team 316 - STM32F103ZET6 PWM Driver
  *
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -25,31 +25,88 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/i2c/i2c_master.h>
+
+#include <errno.h>
+#include <debug.h>
+
+#include <nuttx/board.h>
+#include <nuttx/timers/pwm.h>
+
+#include <arch/board/board.h>
 
 #include <stm32.h>
-#include <arch/board/board.h>
+#include "stm32_pwm.h"
+
+#ifdef CONFIG_PWM
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* PWM: TIM1 CH1 is output on PA8.  The CH1 pin is configured by the common
+ * STM32 PWM driver when CONFIG_STM32_TIM1_CH1OUT is selected.
+ */
+
+#define HAVE_PWM 1
+
+#ifndef CONFIG_STM32_TIM1
+#  undef HAVE_PWM
+#endif
+
+#ifndef CONFIG_STM32_TIM1_PWM
+#  undef HAVE_PWM
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: stm32_i2c1_initialize
+ * Name: stm32_pwm_setup
  *
  * Description:
- *   Configure the I2C1 SCL/SDA pins (PB6/PB7).  The I2C peripheral itself
- *   is initialized and its pins are re-configured by stm32_i2cbus_initialize(1)
- *   during bring-up.
+ *   Initialize TIM1 for PWM output and register the PWM device at /dev/pwm0.
  *
  ****************************************************************************/
 
-int stm32_i2c1_initialize(void)
+int stm32_pwm_setup(void)
 {
-  /* Configure I2C1 GPIO pins */
+#ifdef HAVE_PWM
+  static bool initialized = false;
+  struct pwm_lowerhalf_s *pwm;
+  int ret;
 
-  stm32_configgpio(GPIO_I2C1_SCL);
-  stm32_configgpio(GPIO_I2C1_SDA);
+  /* Have we already initialized? */
+
+  if (!initialized)
+    {
+      /* Call stm32_pwminitialize() to get an instance of the PWM interface */
+
+      pwm = stm32_pwminitialize(1);
+      if (!pwm)
+        {
+          aerr("ERROR: Failed to get the STM32 PWM lower half\n");
+          return -ENODEV;
+        }
+
+      /* Register the PWM driver at "/dev/pwm0" */
+
+      ret = pwm_register("/dev/pwm0", pwm);
+      if (ret < 0)
+        {
+          aerr("ERROR: pwm_register failed: %d\n", ret);
+          return ret;
+        }
+
+      /* Now we are initialized */
+
+      initialized = true;
+    }
 
   return OK;
+#else
+  return -ENODEV;
+#endif
 }
+
+#endif /* CONFIG_PWM */
